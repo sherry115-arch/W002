@@ -11,7 +11,7 @@
 <header><div class="brand">✦ 古字時空探險隊</div><div class="tools"><a class="video-link" href="https://www.youtube.com/watch?v=gSN5GBZDaD0" target="_blank" rel="noopener noreferrer">▶ 看〈古〉影片</a><button id="sound" aria-pressed="false">♫ 音效：關</button><button id="restart">↻ 重新挑戰</button></div></header>
 <main><p class="intro">漢字說故事 〈古〉・二年級觀影後任務・字形圖片版</p><div class="layout"><aside class="map"><div><div class="tag">TIME MISSION / 古</div><h1>穿越時空<br>尋找「古」的祕密</h1></div><div class="moon" aria-hidden="true">🚀</div><p>看完影片了嗎？完成 8 個任務，收集 8 顆時光星！</p><div class="stops" id="stops" aria-label="闖關進度"></div><progress id="progress" max="8" value="0" aria-label="已完成任務"></progress><p class="count" id="count">已收集 0 / 8 顆星</p><p>💛 不用搶快。<br>看提示、再試一次，也能得到星星。</p></aside>
 <section class="card" aria-label="學習任務"><div class="topline"><span id="step">任務 1 / 8</span><span>觀察 → 想一想 → 試一試</span></div><div class="body" id="game"></div></section></div>
-<footer class="footer"><details><summary>給老師：字形來源與使用說明（古字版）</summary><p>內容依老師提供的「古、姑、枯、故」重點及漢典編寫原創延伸題，未取得影片完整字幕，不作逐句情節測驗。「古」的字源有不同解釋；本頁不把記字聯想當作唯一、確定的造字起源。</p><p>字形來源：<a href="https://zdic.net/hans/%E5%8F%A4" target="_blank" rel="noopener noreferrer">漢典・古・字源字形</a>。採用甲骨文、金文、說文小篆與楷書圖片；隸書選用該頁「各書體字形實例」中的東漢〈禮器碑〉例字。另附楚系簡帛、秦系簡牘圖片。</p><p>五種字體排序為適合低年級的簡化發展線索，不代表每種字體只有一種寫法，或各類型的使用年代完全不重疊。楚系簡帛、秦系簡牘不硬插入單一排序。</p><p>部件教學：女＋古＝姑、木＋古＝枯、古＋攵＝故。古可提供聲音線索，古ㄍㄨˇ、姑ㄍㄨ、枯ㄎㄨ、故ㄍㄨˋ並不完全同音。「古加反文說故事」可作記字聯想，不是「攵」的字源定義。</p><p>看完影片後，可投影共答或個別作答。沒有倒數、扣分或排行榜；「自己完成／看提示完成／再試後完成」供教師形成性評量。自由回饋由老師閱讀，不由電腦判對錯。</p><p>單一 HTML，字形圖片已內嵌；無須登入，離線也能闖關。影片與來源連結需要網路。朗讀使用裝置內建語音，是否可用取決於瀏覽器。完成後可透過 GAS 將回饋寄給老師；未送出的內容只留在目前頁面，重新整理即清除，可列印保存。老師需先完成下方的一次性設定。上傳 GitHub Pages 請保持檔名 index.html。</p></details><details class="teacher-setup no-print"><summary>老師設定：連接 GAS 寄信</summary><p>收件人固定為 sherry_nice@msn.com，請先依設定說明部署 Code.gs。</p><label for="gasEndpoint">貼上網頁應用程式的 /exec 網址</label><input id="gasEndpoint" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"><button class="btn gold" id="exportConfigured" type="button">下載設定好的 index.html</button><p id="setupMessage" role="status"></p><p>下載後需重新上傳 GitHub，學生才會使用相同設定。請勿將 Code.gs 上傳 GitHub；它要貼到 Google Apps Script。</p></details></footer></main>
+</main>
 <script id="gas-config" type="application/json">{"endpoint": "https://script.google.com/macros/s/AKfycbwYCh4hQmQ7RqscFtyv04puhgX6VAPjHx878s0RONvYaVH93-zzbhS3CIeUKtf2KZPX/exec"}</script>
 <script>
 'use strict';
@@ -75,25 +75,7 @@ window.addEventListener('message',event=>{
  else {submission=null;freezeFeedback(false);$('saveReflection').disabled=false;$('saveReflection').textContent='📨 寄給老師';feedback(d.message,'try');}
 });
 function resetMail(){clearTimeout(mailTimer);if(mailFrame)mailFrame.remove();mailFrame=null;submission=null;mailState='idle';}
-function setupTeacherPanel(){
- $('gasEndpoint').value=GAS_CONFIG.endpoint||'';
- $('exportConfigured').onclick=()=>{
-  const endpoint=$('gasEndpoint').value.trim();
-  if(!validGasEndpoint(endpoint)){$('setupMessage').textContent='請貼上 https://script.google.com/macros/s/…/exec 格式的部署網址。';return;}
-  GAS_CONFIG.endpoint=endpoint;
-  // Export a clean starter page, never student input or an in-flight payload.
-  const copy=document.documentElement.cloneNode(true);
-  copy.querySelector('#gas-config').textContent=JSON.stringify({endpoint:endpoint});
-  copy.querySelector('#game').innerHTML='';copy.querySelector('#stops').innerHTML='';
-  copy.querySelector('#progress').setAttribute('value','0');copy.querySelector('#count').textContent='已收集 0 / 8 顆星';copy.querySelector('#step').textContent='任務 1 / 8';
-  copy.querySelector('#gasEndpoint').setAttribute('value','');copy.querySelector('#setupMessage').textContent='';
-  copy.querySelectorAll('[data-mail-transient],.confetti').forEach(el=>el.remove());
-  copy.querySelectorAll('details[open]').forEach(el=>el.removeAttribute('open'));
-  const blob=new Blob(['<!DOCTYPE html>\n'+copy.outerHTML],{type:'text/html;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='index.html';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-  $('setupMessage').textContent='已產生設定好的 index.html。請將下載的新檔上傳 GitHub，覆蓋舊檔，再從正式網址測試。';
- };
-}
-setupTeacherPanel();
+
 
 $('restart').onclick=restart;$('sound').onclick=()=>{soundOn=!soundOn;$('sound').textContent='♫ 音效：'+(soundOn?'開':'關');$('sound').setAttribute('aria-pressed',String(soundOn));if(soundOn)tone(true);};render();
 </script></body></html>
